@@ -37,6 +37,7 @@ Luego visita `http://localhost:3000`.
 | Grande    | 20     |
 | Mediano   | 50     |
 | Pequeño   | 100    |
+| Estrella fugaz | 250 |
 
 ## Power-ups
 
@@ -52,3 +53,4 @@ Mientras está activo, la llama del propulsor se ve cian y el HUD muestra el tie
 - Asteroides se parten en fragmentos más pequeños al ser destruidos
 - Partículas de explosión al destruir asteroides
 - Power-up de velocidad (drop de asteroides) con contador en el HUD
+- Estrella fugaz: asteroide rápido que cruza la pantalla cada 8–16 s y desaparece a los 6 s; da 250 puntos si se destruye
