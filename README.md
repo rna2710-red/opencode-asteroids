@@ -40,6 +40,8 @@ Luego visita `http://localhost:3000`.
 | Pequeño   | 100    |
 | Estrella fugaz | 250 |
 
+> Con la skin **Titán** todos los puntos se duplican.
+
 ## Power-ups
 
 | Power-up  | Efecto                        | Duración | Cómo se obtiene                                                                 |
@@ -52,7 +54,7 @@ Mientras están activos, el HUD muestra el tiempo restante (`VELOCIDAD 3.2s` en 
 
 ## Skins
 
-La tecla `C` cicla entre 5 skins de la nave (clásica, caza, exploradora, alienígena, fantasma): cambian el casco, el color del trazo y la llama del propulsor. La elección se guarda en `localStorage` y sobrevive a recargas; también se refleja en los iconos de vidas del HUD.
+La tecla `C` cicla entre 6 skins de la nave (clásica, caza, exploradora, alienígena, fantasma y titán): cambian el casco, el color del trazo y la llama del propulsor. La elección se guarda en `localStorage` y sobrevive a recargas; también se refleja en los iconos de vidas del HUD. La skin **Titán** es morada, el doble de grande que la clásica (más fácil de chocar) y duplica todos los puntos obtenidos.
 
 ## Características
 
@@ -62,5 +64,5 @@ La tecla `C` cicla entre 5 skins de la nave (clásica, caza, exploradora, alien�
 - Power-up de velocidad (drop de asteroides) con contador en el HUD
 - Power-up de triple disparo (drop de asteroides): 3 balas paralelas durante 5 s
 - Power-up de escudo (drop de asteroides): burbuja verde que desintegra los asteroides que la tocan
-- 5 skins de nave conmutables con `C` y persistencia en `localStorage`
+- 6 skins de nave conmutables con `C` y persistencia en `localStorage`, incluida la **Titán**: morada, doble de tamaño y con puntos x2
 - Estrella fugaz: asteroide rápido que cruza la pantalla cada 8–16 s y desaparece a los 6 s; da 250 puntos si se destruye

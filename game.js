@@ -95,7 +95,7 @@ const STAR_TTL      = 6;          // segundos en pantalla
 const STAR_POINTS   = 250;        // bonus por destruirla
 const STAR_INTERVAL = [8, 16];    // segundos entre apariciones
 
-// ── Skins de la nave (cosméticas) ────────────────────────────────────────────
+// ── Skins de la nave (la TITÁN duplica tamaño y puntos) ──────────────────────
 const SKINS = [
   {
     name: 'CLÁSICA',
@@ -126,6 +126,14 @@ const SKINS = [
     color: 'rgba(255, 255, 255, 0.45)',
     hull: [[20, -2], [4, -10], [-13, -6], [-9, 0], [-13, 6], [4, 10]],
     flame: 'rgba(255, 255, 255, 0.35)',
+  },
+  {
+    name: 'TITÁN',
+    color: '#c77dff',
+    hull: [[20, 0], [-12, -9], [-7, 0], [-12, 9]],
+    flame: 'rgba(199, 125, 255, 0.85)',
+    scale: 2,      // doble de tamaño que la clásica
+    scoreMult: 2,  // duplica los puntos obtenidos
   },
 ];
 
@@ -326,7 +334,7 @@ class Ship {
     this.angle  = -Math.PI / 2;
     this.vx     = 0;
     this.vy     = 0;
-    this.radius = 12;
+    this.radius = 12 * this.scale;
     this.thrusting     = false;
     this.invincible    = 3;
     this.shootCooldown = 0;
@@ -335,6 +343,9 @@ class Ship {
     this.shieldTimer   = 0;
     this.dead          = false;
   }
+
+  get scale()    { return SKINS[skinIndex].scale    || 1; }
+  get scoreMult() { return SKINS[skinIndex].scoreMult || 1; }
 
   update(dt) {
     if (this.dead) return;
@@ -367,7 +378,7 @@ class Ship {
   tryShoot() {
     if (this.shootCooldown > 0 || this.dead) return [];
     this.shootCooldown = 0.2;
-    const NOSE = 21;
+    const NOSE = 21 * this.scale;
     const ox = this.x + Math.cos(this.angle) * NOSE;
     const oy = this.y + Math.sin(this.angle) * NOSE;
 
@@ -392,18 +403,23 @@ class Ship {
     ctx.translate(this.x, this.y);
     ctx.rotate(this.angle);
     ctx.strokeStyle = skin.color;
-    ctx.lineWidth   = 1.5;
+    ctx.lineWidth   = 1.5 / this.scale;
     ctx.lineJoin    = 'round';
+    ctx.save();
+    ctx.scale(this.scale, this.scale);
     drawHull(skin.hull);
     ctx.stroke();
+    ctx.restore();
 
     // Llama del propulsor
     if (this.thrusting && Math.random() > 0.35) {
+      const S = this.scale;
       ctx.beginPath();
-      ctx.moveTo(-8, -4);
-      ctx.lineTo(-8 - rand(6, 14), 0);
-      ctx.lineTo(-8,  4);
+      ctx.moveTo(-8 * S, -4 * S);
+      ctx.lineTo(-8 * S - rand(6, 14) * S, 0);
+      ctx.lineTo(-8 * S,  4 * S);
       ctx.strokeStyle = this.speedTimer > 0 ? 'rgba(0, 230, 255, 0.85)' : skin.flame;
+      ctx.lineWidth   = 1.5;
       ctx.stroke();
     }
 
@@ -416,7 +432,7 @@ class Ship {
       ctx.strokeStyle = 'rgba(51, 255, 51, 0.75)';
       ctx.lineWidth   = 1.5;
       ctx.beginPath();
-      ctx.arc(this.x, this.y, SHIELD_RADIUS * pulse, 0, Math.PI * 2);
+      ctx.arc(this.x, this.y, SHIELD_RADIUS * this.scale * pulse, 0, Math.PI * 2);
       ctx.stroke();
     }
   }
@@ -504,7 +520,7 @@ function explode(x, y, count = 8) {
 
 function destroyAsteroid(a) {
   a.dead = true;
-  score += a.points;
+  score += Math.round(a.points * ship.scoreMult);
   explode(a.x, a.y, a.size * 5);
   const r = Math.random();
   if (r < SHIELD_DROP_CHANCE)
@@ -603,7 +619,7 @@ function update(dt) {
 
   // Nave vs asteroide
   if (ship.invincible <= 0) {
-    const contactRadius = ship.shieldTimer > 0 ? SHIELD_RADIUS : ship.radius;
+    const contactRadius = ship.shieldTimer > 0 ? SHIELD_RADIUS * ship.scale : ship.radius;
     const shieldSplits  = [];
     for (const a of asteroids) {
       if (dist(ship, a) >= contactRadius + a.radius * 0.82) continue;
@@ -620,7 +636,7 @@ function update(dt) {
 // ── Draw ──────────────────────────────────────────────────────────────────────
 function drawLifeIcon(x, y) {
   const skin = SKINS[skinIndex];
-  const SCALE = 0.45;
+  const SCALE = 0.45 * (skin.scale || 1);
   ctx.save();
   ctx.translate(x, y);
   ctx.rotate(-Math.PI / 2);
@@ -641,6 +657,11 @@ function drawHUD() {
   ctx.fillText(`SCORE  ${score}`, 14, 26);
 
   let hudLine = 46;
+  if (ship.scoreMult > 1) {
+    ctx.fillStyle = '#c77dff';
+    ctx.fillText(`PUNTOS x${ship.scoreMult}`, 14, hudLine);
+    hudLine += 20;
+  }
   if (ship.speedTimer > 0) {
     ctx.fillStyle = '#0ff';
     ctx.fillText(`VELOCIDAD ${ship.speedTimer.toFixed(1)}s`, 14, hudLine);
@@ -660,8 +681,11 @@ function drawHUD() {
   ctx.textAlign = 'center';
   ctx.fillText(`NIVEL ${level}`, W / 2, 26);
 
+  const iconScale = SKINS[skinIndex].scale || 1;
+  const step = 22 * iconScale;
+  const yIcon = 9 + 9 * iconScale;  // el borde superior del icono queda en y≈9
   for (let i = 0; i < lives; i++)
-    drawLifeIcon(W - 16 - i * 22, 18);
+    drawLifeIcon(W - 16 - i * step, yIcon);
 
 }
 
